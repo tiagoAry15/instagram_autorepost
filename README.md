@@ -42,7 +42,7 @@ Este é um bot do Instagram que automatiza várias tarefas, como repostar storie
 Execute o script principal:
 
 ```bash
-python main.py
+python instagram_bot.py
 ```
 
 ## Funcionalidades
