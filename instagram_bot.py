@@ -3,6 +3,7 @@ from PIL import Image
 from instagrapi import Client
 from instagrapi.types import StoryMention, UserShort
 
+
 def verify_if_story_is_already_posted(story):
     posted_stories = read_posted_stories()
     if str(story.pk) in posted_stories:
@@ -54,6 +55,8 @@ class Instagram_bot:
         return self.client.user_following(user_id)
 
     def get_followers_accounts(self, username=None):
+        if username is None:
+            username = self.username
         user_id = self.client.user_info_by_username(username).pk
         return self.client.user_followers(user_id)
 
