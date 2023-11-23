@@ -61,7 +61,7 @@ class Instagram_bot:
         """
 
         self.client = Client()
-        self.client.delay_range = [1, 3]
+        self.client.delay_range = [1, 30]
         session = self.client.load_settings("session.json")
 
         login_via_session = False
@@ -102,6 +102,8 @@ class Instagram_bot:
             raise Exception("Couldn't login user with either password or session")
 
     def get_following_accounts(self, username=None):
+        if username is None:
+            username = self.username
         user_id = self.client.user_info_by_username(username).pk
         return self.client.user_following(user_id)
 
@@ -113,12 +115,15 @@ class Instagram_bot:
 
     def get_followers_stories_with_self_mentions(self, user_followers):
         stories_with_mentions = []
-        for follower in user_followers:
-            user_stories = self.client.user_stories(follower)
-            for story in user_stories:
-                for mentions in story.mentions:
-                    if mentions.user.username == self.username:
-                        stories_with_mentions.append(story)
+        step = 18
+        users_ids = list(user_followers.keys())
+        for index in range(0, len(users_ids), step):
+            stories = self.client.users_stories_gql(users_ids[index:index + step])
+            for users in stories:
+                for story in users.stories:
+                    for mention in story.mentions:
+                        if mention.user.username == bot.username:
+                            stories_with_mentions.append(story)
         return stories_with_mentions
 
     def repost_stories_with_self_mentions(self, stories_with_mentions):
@@ -147,6 +152,9 @@ class Instagram_bot:
 # Exemplo de uso
 if __name__ == "__main__":
     bot = Instagram_bot()
-    followers = bot.get_followers_accounts()
-    stories = bot.get_followers_stories_with_self_mentions(followers)
-    bot.repost_stories_with_self_mentions(stories)
+    following = bot.get_following_accounts()
+    print("Obteu as contas seguidas")
+    stories_mentioned = bot.get_followers_stories_with_self_mentions(following)
+    print("Obteu os stories que a conta foi mencionada")
+    bot.repost_stories_with_self_mentions(stories_mentioned)
+    print("Postou")
